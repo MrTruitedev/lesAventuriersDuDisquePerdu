@@ -8,4 +8,8 @@ Le but de ce stage est d'ajouter à la base de donnée existante une application
 Nous devrons donc concecvoir le moteur de l'application, l'interface WEB administrateur et utilisateur puis l'integrer dans un conteneur Linux
 
 
+------------------------------------------------------------------
+# Cahier des charges
+------------------------------------------------------------------
 
+Le cdc contient les objectifs du projets, les fonctionnalités attendues de l'app, les contraintes et les differentes étapes de développement
