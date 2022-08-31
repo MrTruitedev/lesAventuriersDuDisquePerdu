@@ -15,4 +15,9 @@ Le cdc contient les objectifs du projets, les fonctionnalités attendues de l'ap
 
 # UML
 
-Les fichiers UML sont consultable et modifiable sur StarUML
+Le fichier addpUML.mdj est consultable et modifiable sur StarUML. Il contient le diagramme de cas d'utilisation, les diagrammes d'activités et le diagramme de classe.
+
+# MCD-MLD
+
+Le fchier addpMCD.loo est consultable et modifiable sur Looping. Il contient le MCD et le MLD du projet.
+
