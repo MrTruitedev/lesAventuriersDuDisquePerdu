@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<PHOTO_CAT container="STOCK" version="0.8" >
+	<DIRECTORY source="Photos" year="2004" category="Stock" type="Perso" client="" path="" >
+	</DIRECTORY>
+	<DIRECTORY source="Photos" year="2004" category="Stock" type="Perso" client="" path="/Backstage Fabien Azzopardi" >
+		<KEYWORDS>backstage azzopardi fabien</KEYWORDS>
+	</DIRECTORY>
+	<DIRECTORY source="Photos" year="2004" category="Stock" type="Perso" client="" path="/Backstage Fabien Azzopardi/313CANON" >
+		<KEYWORDS>backstage azzopardi fabien 313canon</KEYWORDS>
+		<ReSUME filessize="38680846" numberoffile="19" extensions=".DB .JPG" ></ReSUME>
+	</DIRECTORY>
+	<DIRECTORY source="Photos" year="2004" category="Stock" type="Perso" client="" path="/Backstage Fabien Azzopardi/314CANON" >
+		<KEYWORDS>backstage azzopardi 314canon fabien</KEYWORDS>
+		<RESUME filessize="237669834" numberoffile="101" extensions=".DB .JPG" ></RESUME>
+	</DIRECTORY>
+	<DIRECTORY source="Photos" year="2004" category="Stock" type="Perso" client="" path="/Backstage Fabien Azzopardi/315CANON" >
+		<KEYWORDS>backstage azzopardi 315canon fabien</KEYWORDS>
+		<RESUME filessize="183138075" numberoffile="79" extensions=".DB .JPG" ></RESUME>
+	</DIRECTORY>
+	<DIRECTORY source="Photos" year="2004" category="Stock" type="Perso" client="" path="/Backstage Fabien Azzopardi/CANONMSC" >
+		<KEYWORDS>backstage azzopardi canonmsc fabien</KEYWORDS>
+		<RESUME filessize="14285" numberoffile="4" extensions=".CTG" ></RESUME>
+	</DIRECTORY>
+    </PHOTO_CAT>
