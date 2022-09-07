@@ -1,0 +1,7 @@
+dbTableCatalog = 'catalog'
+dbTableKeyword = 'keyword'
+dbTableLinkKeyword = 'link_keyword'
+dbHost = '192.168.0.6'
+dbUser = 'eddy'
+dbPassword = 'girafe70'
+dbName = 'PhotoCatalog'
