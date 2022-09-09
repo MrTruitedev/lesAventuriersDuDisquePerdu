@@ -6,6 +6,8 @@
 package thomas.photosearch;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -19,19 +21,16 @@ public class DirectoryInfo {
     public HashMap<String, String> directory = new HashMap();
     private HashMap<String, String> resume = new HashMap();
     private ArrayList<String> keywordsList = new ArrayList();
-    private int containerType;
     public final static String TYPE_WORK = "WORK";
     public final static String TYPE_STOCK = "STOCK";
     public final static String TYPE_UNKNOW = "???";
-
+    private int containerType;
+    
     public HashMap<String, String> getDirectory() {
         return directory;
     }
 
     public String[] getAllKeyValueForCatalog() {
-        String sqlInsertKey = "";
-        String directoryKeys = "";
-        String resumeKeys = "";
         String[] str_nv = new String[2];
         String namestr = "";
         String valuestr = "";
@@ -49,30 +48,15 @@ public class DirectoryInfo {
         System.out.println(">> " + str_nv[0] + ">> " + str_nv[1]);
 
         return str_nv;
-//        for(String i : directory.keySet()){
-//           directoryKeys += i+", ";
-//        }
-//        for(String j : resume .keySet()){
-//            resumeKeys += j+", ";
-//        }
-//        sqlInsertKey = directoryKeys+resumeKeys;
-//         return sqlInsertKey;
-//  
     }
-
-//    public String getAllValueForCatalog() {
-//        String sqlInsertValue = "";
-//        String directoryValue = "";
-//        String resumeValue = "";
-//        for (String strd : directory.values()) {
-//            directoryValue += strd + ", ";
-//        }
-//        for (String strr : resume.values()) {
-//            resumeValue += strr + ", ";
-//        }
-//        sqlInsertValue = directoryValue + resumeValue;
-//        return sqlInsertValue;
-//    }
+    public String getAllKeywords(){
+        String kw = "";
+        Enumeration enumeration = Collections.enumeration(keywordsList);
+        while(enumeration.hasMoreElements()){
+            kw += (String) enumeration.nextElement()+" ";
+        }
+        return kw;
+    }
 
     public HashMap<String, String> getResume() {
         return resume;

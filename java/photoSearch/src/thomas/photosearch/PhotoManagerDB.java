@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,24 +71,36 @@ public class PhotoManagerDB {
         }
     }
 
-    void insert(DirectoryInfo di) throws SQLException {
+    void insert(DirectoryInfo di, DirectoryInfo kl) throws SQLException {
         Statement stmt = con.createStatement();
-//         String key[] = {
-//                "id"
-//            };
+        int idCatalog = -1;
+        int idKeyword = -1;
+
         try {
-            //stmt.execute("START TRANSACTION;");
-            String sql = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")";
+
+            String sqlCatalog = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")";
            
-            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.executeUpdate();
-            //ResultSet rs = ps.getGeneratedKeys();sql.SQLException: Generated keys not requested. You need to specify Statement.RETURN_GENERATED_KEYSsql.SQLException: Generated keys not requested. You need to specify Statement.RETURN_GENERATED_KEYS   
-            System.out.println(stmt.getGeneratedKeys());
-//            ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID();");
-//            while(rs.next()){
-//                System.out.println(rs.getString("InsertId"));
-//            }
-           // stmt.execute("COMMIT;");
+            PreparedStatement ps1 = con.prepareStatement(sqlCatalog, Statement.RETURN_GENERATED_KEYS);
+            ps1.executeUpdate();
+            ResultSet rsCatalog = ps1.getGeneratedKeys();   
+            if (rsCatalog.next()){
+                idCatalog = rsCatalog.getInt(1);
+            }
+            System.out.println("LAST INSERTED ID CATALOG >>>>>"+idCatalog);
+            
+            String sqlKeywords = "INSERT INTO keywords(keyword) VALUES('" + kl.getAllKeywords()+"')";
+            PreparedStatement ps2 = con.prepareStatement(sqlKeywords, Statement.RETURN_GENERATED_KEYS);
+            ps2.executeUpdate();
+            ResultSet rsKeyword = ps2.getGeneratedKeys();
+            if(rsKeyword.next()){
+                idKeyword = rsKeyword.getInt(1);
+            }
+            System.out.println("LAST INSERTED ID KEYWORDS >>>>>"+idKeyword);
+            
+            String sqlLink = "INSERT INTO link_keywords(id_key, id_catalog) (SELECT catalog.id, keywords.id FROM catalog, keywords WHERE catalog.id = '"+idCatalog+"' AND keywords.id = '"+idKeyword+"')";
+            PreparedStatement ps3 = con.prepareStatement(sqlLink);
+            ps3.executeUpdate();
+            
         } catch (Exception e) {
             System.err.println(e);
         }

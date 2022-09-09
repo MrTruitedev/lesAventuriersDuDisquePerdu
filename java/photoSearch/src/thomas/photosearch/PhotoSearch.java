@@ -6,6 +6,7 @@
 package thomas.photosearch;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  *
@@ -15,7 +16,7 @@ public class PhotoSearch {
 
     //CONFIG_FILE : Prévoir cette constante dans un fichier de config
     //final static public String CONFIG_FILE = "/etc/gettrees/gettrees_config";
-    final static public String CONFIG_FILE = "C:\\Users\\thomas\\Desktop\\Stage\\java\\photoSearch\\gettrees_config";
+    final static public String CONFIG_FILE = "D:\\user\\tutu\\Desktop\\Stage\\lesAventuriersDuDisquePerdu\\java\\photoSearch\\gettrees_config";
 
     /**
      * @param args the command line arguments
@@ -36,8 +37,9 @@ public class PhotoSearch {
         XMLTreeReader tr_s = new XMLTreeReader(xmlFileStock);
         for(int i=0 ; i<tr_s.getLength(); i++){
             DirectoryInfo di = tr_s.getLine(i);
+            DirectoryInfo kl = tr_s.getLine(i);
             //System.out.println(di.getDirectory().get("path"));
-            pm.insert(di);
+            pm.insert(di, kl);
             
         }
         
@@ -45,8 +47,9 @@ public class PhotoSearch {
         XMLTreeReader tr_w = new XMLTreeReader(xmlFileWork);
         for(int i=0 ; i<tr_w.getLength(); i++){
             DirectoryInfo di = tr_w.getLine(i);
+            DirectoryInfo kl = tr_s.getLine(i);
             //....
-            pm.insert(di);            
+            pm.insert(di, kl);            
         }
     }
 
