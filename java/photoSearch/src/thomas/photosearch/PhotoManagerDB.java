@@ -14,7 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
+
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,35 +72,56 @@ public class PhotoManagerDB {
     }
 
     void insert(DirectoryInfo di, DirectoryInfo kl) throws SQLException {
-        Statement stmt = con.createStatement();
+
         int idCatalog = -1;
         int idKeyword = -1;
 
         try {
 
             String sqlCatalog = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")";
-           
+
             PreparedStatement ps1 = con.prepareStatement(sqlCatalog, Statement.RETURN_GENERATED_KEYS);
             ps1.executeUpdate();
-            ResultSet rsCatalog = ps1.getGeneratedKeys();   
-            if (rsCatalog.next()){
+            ResultSet rsCatalog = ps1.getGeneratedKeys();
+            if (rsCatalog.next()) {
                 idCatalog = rsCatalog.getInt(1);
             }
-            System.out.println("LAST INSERTED ID CATALOG >>>>>"+idCatalog);
-            
-            String sqlKeywords = "INSERT INTO keywords(keyword) VALUES('" + kl.getAllKeywords()+"')";
-            PreparedStatement ps2 = con.prepareStatement(sqlKeywords, Statement.RETURN_GENERATED_KEYS);
-            ps2.executeUpdate();
-            ResultSet rsKeyword = ps2.getGeneratedKeys();
-            if(rsKeyword.next()){
-                idKeyword = rsKeyword.getInt(1);
+            System.out.println("LAST INSERTED ID CATALOG >>>>>" + idCatalog);
+
+            String[] splitKeywords = kl.getAllKeywords().split(" ");
+
+            for (int i = 0; i < splitKeywords.length; i++) {
+                int size = 0;
+                String sqlKeywordsSelect = "SELECT id FROM `keywords` WHERE keyword = ' " + splitKeywords[i] + " '";
+                Statement ps2 = con.createStatement();
+                ResultSet rsSelect = ps2.executeQuery(sqlKeywordsSelect);
+
+                rsSelect.last();
+                size = rsSelect.getRow();
+                rsSelect.beforeFirst();
+
+                if (size == 0) {
+                    String sqlKeywordsInsert = "INSERT INTO keywords(keyword) VALUES (' " + splitKeywords[i] + "')";
+                    System.out.println("KEYWORD>>>>> " + splitKeywords[i]);
+                    PreparedStatement psKey = con.prepareStatement(sqlKeywordsInsert, Statement.RETURN_GENERATED_KEYS);
+                    psKey.executeUpdate();
+                    ResultSet rsKeyword = psKey.getGeneratedKeys();
+                    if (rsKeyword.next()) {
+                        idKeyword = rsKeyword.getInt(1);
+                    }
+                }
             }
-            System.out.println("LAST INSERTED ID KEYWORDS >>>>>"+idKeyword);
-            
-            String sqlLink = "INSERT INTO link_keywords(id_key, id_catalog) (SELECT catalog.id, keywords.id FROM catalog, keywords WHERE catalog.id = '"+idCatalog+"' AND keywords.id = '"+idKeyword+"')";
-            PreparedStatement ps3 = con.prepareStatement(sqlLink);
-            ps3.executeUpdate();
-            
+
+            System.out.println("LAST INSERTED ID KEYWORDS >>>>>" + idKeyword);
+
+            //CODE FAUX A REPRENDRE boucle sur autre chose que di.size()
+            for (int j = 1; j <= di.getAllKeyValueForCatalog().length; j++) {    
+                String sqlLink = "INSERT INTO link_keywords(id_catalog,id_key) VALUES ('"+j+"', (SELECT keywords.id FROM keywords WHERE keyword = ' " + splitKeywords[j] + " '))";
+                PreparedStatement ps3 = con.prepareStatement(sqlLink);
+                ps3.executeUpdate();
+            }
+
+//            String sqlLink = "INSERT INTO link_keywords(id_key, id_catalog) (SELECT catalog.id, keywords.id FROM catalog, keywords WHERE catalog.id = '" + idCatalog + "' AND keywords.id = '" + idKeyword + "')";
         } catch (Exception e) {
             System.err.println(e);
         }
