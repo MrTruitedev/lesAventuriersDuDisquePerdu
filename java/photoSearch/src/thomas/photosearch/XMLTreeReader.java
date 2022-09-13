@@ -12,6 +12,9 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import org.w3c.dom.NamedNodeMap;
 
@@ -23,19 +26,19 @@ public class XMLTreeReader {
 
     public final static String TAG_PHOTO_CAT = "PHOTO_CAT";
     public final static String TAG_DIRECTORY = "DIRECTORY";
-    public final static String TAG_KEYWORDS= "KEYWORDS";
-    public final static String TAG_RESUME= "RESUME";
-    
-    public final static String ATTR_CONTAINER= "container";
+    public final static String TAG_KEYWORDS = "KEYWORDS";
+    public final static String TAG_RESUME = "RESUME";
+
+    public final static String ATTR_CONTAINER = "container";
     public final static String ATTR_VERSION = "version";
-    
+
     public final static int CONTAINER_TYPE_WORK = 1;
     public final static int CONTAINER_TYPE_STOCK = 2;
     public final static int CONTAINER_TYPE_UNKNOW = 0;
-    
+
     private int length = 0;
     public int containerType = CONTAINER_TYPE_UNKNOW;
-    
+
     private NodeList nodeList;
     private String version;
 
@@ -73,7 +76,7 @@ public class XMLTreeReader {
             //recuperer le type de container dans le tag PHOTO CAT
 
             nodeList = doc.getElementsByTagName(TAG_PHOTO_CAT);
-           
+
             switch (nodeList.item(0).getAttributes().getNamedItem(ATTR_CONTAINER).getNodeValue()) {
                 case DirectoryInfo.TYPE_WORK:
                     containerType = CONTAINER_TYPE_WORK;
@@ -107,6 +110,8 @@ public class XMLTreeReader {
             return null;
         }
         DirectoryInfo di = new DirectoryInfo();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
 
         Node node = nodeList.item(index);// Pointe sur le tag DIRECTORY à la position [index]
 
@@ -119,6 +124,7 @@ public class XMLTreeReader {
             if (attrList.getLength() > 0) {
                 for (int i = 0; i < attrList.getLength(); i++) {
                     di.addDirectoryAttr(attrList.item(i).getNodeName(), attrList.item(i).getNodeValue());
+                    di.addDirectoryAttr("date", formatter.format(date));
                 }
             }
             //Boucle pour parcourir les noeuds enfant de DIRECTORY
