@@ -5,8 +5,11 @@
  */
 package thomas.photosearch;
 
+import static com.sun.org.apache.xalan.internal.lib.ExsltDatetime.year;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.time.LocalDate;
 
 /**
  *
@@ -35,6 +38,7 @@ public class PhotoSearch {
         
         //Analyse STOCK file       
         XMLTreeReader tr_s = new XMLTreeReader(xmlFileStock);
+       
         for(int i=0 ; i<tr_s.getLength(); i++){
             DirectoryInfo di = tr_s.getLine(i);
             DirectoryInfo kl = tr_s.getLine(i);
@@ -51,6 +55,8 @@ public class PhotoSearch {
             //....
             pm.insert(di, kl);            
         }
+
+        
     }
 
 }
