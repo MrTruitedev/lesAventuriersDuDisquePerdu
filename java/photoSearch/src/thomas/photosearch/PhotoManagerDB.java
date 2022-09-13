@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 
 import java.util.Properties;
 import java.util.logging.Level;
@@ -79,7 +80,8 @@ public class PhotoManagerDB {
         try {
             //Requete d'insertion dans la table catalog
             //Recupere les infos contenues dans di[0](->key) et di[1](->values)
-            String sqlCatalog = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")";
+            String sqlCatalog = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")" ;
+            
             //Préparation de la requete et ajout d'un statement afin de récuperer l'id de la derniere ligne inserée
             PreparedStatement ps1 = con.prepareStatement(sqlCatalog, Statement.RETURN_GENERATED_KEYS);
             //Execution de la requete
@@ -144,15 +146,19 @@ public class PhotoManagerDB {
             if (p.getProperty(PROP_USER) != null) {
                 user = p.getProperty(PROP_USER);
             }
+            //PROP PASSWORD
             if (p.getProperty(PROP_PASSWORD) != null) {
                 password = p.getProperty(PROP_PASSWORD);
             }
+            //PROP DATABASE
             if (p.getProperty(PROP_DATABASE) != null) {
                 database = p.getProperty(PROP_DATABASE);
             }
+            //PROP HOST
             if (p.getProperty(PROP_HOST) != null) {
                 host = p.getProperty(PROP_HOST);
             }
+            //PROP PORT
             if (p.getProperty(PROP_PORT) != null) {
                 port = p.getProperty(PROP_PORT);
             } else {
@@ -168,5 +174,5 @@ public class PhotoManagerDB {
                     .getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+   
 }
