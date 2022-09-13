@@ -91,41 +91,33 @@ public class PhotoManagerDB {
             String[] splitKeywords = kl.getAllKeywords().split(" ");
 
             for (int i = 0; i < splitKeywords.length; i++) {
-                int size = 0;
-                String sqlKeywordsSelect = "SELECT id FROM `keywords` WHERE keyword = ' " + splitKeywords[i] + " '";
-                Statement ps2 = con.createStatement();
-                ResultSet rsSelect = ps2.executeQuery(sqlKeywordsSelect);
-
-                rsSelect.last();
-                size = rsSelect.getRow();
-                rsSelect.beforeFirst();
-
-                if (size == 0) {
-                    String sqlKeywordsInsert = "INSERT INTO keywords(keyword) VALUES (' " + splitKeywords[i] + "')";
-                    System.out.println("KEYWORD>>>>> " + splitKeywords[i]);
-                    PreparedStatement psKey = con.prepareStatement(sqlKeywordsInsert, Statement.RETURN_GENERATED_KEYS);
-                    psKey.executeUpdate();
-                    ResultSet rsKeyword = psKey.getGeneratedKeys();
-                    if (rsKeyword.next()) {
-                        idKeyword = rsKeyword.getInt(1);
+                if (splitKeywords[i].length() != 0) {
+                    int size;
+                    String sqlKeywordsSelect = "SELECT id FROM `keywords` WHERE keyword = '" + splitKeywords[i] + "'";
+                    Statement ps2 = con.createStatement();
+                    ResultSet rsSelect = ps2.executeQuery(sqlKeywordsSelect);
+                    rsSelect.last();
+                    size = rsSelect.getRow();
+                    rsSelect.beforeFirst();
+                    if (size == 0) {
+                        String sqlKeywordsInsert = "INSERT INTO keywords(keyword) VALUES ('" + splitKeywords[i] + "')";
+                        System.out.println("KEYWORD>>>>> " + splitKeywords[i]);
+                        PreparedStatement psKey = con.prepareStatement(sqlKeywordsInsert, Statement.RETURN_GENERATED_KEYS);
+                        psKey.executeUpdate();
+                        ResultSet rsKeyword = psKey.getGeneratedKeys();
+                        if (rsKeyword.next()) {
+                            idKeyword = rsKeyword.getInt(1);
+                        }
                     }
+                    String sqlLinkInsert = "INSERT INTO link_keywords(id_catalog, id_key) VALUES ('" + idCatalog + "', (SELECT keywords.id FROM keywords WHERE keyword = '" + splitKeywords[i] + "'))";
+                    PreparedStatement psLink = con.prepareStatement(sqlLinkInsert);
+                    psLink.execute();
                 }
             }
-
             System.out.println("LAST INSERTED ID KEYWORDS >>>>>" + idKeyword);
-
-            //CODE FAUX A REPRENDRE boucle sur autre chose que di.size()
-            for (int j = 1; j <= di.getAllKeyValueForCatalog().length; j++) {    
-                String sqlLink = "INSERT INTO link_keywords(id_catalog,id_key) VALUES ('"+j+"', (SELECT keywords.id FROM keywords WHERE keyword = ' " + splitKeywords[j] + " '))";
-                PreparedStatement ps3 = con.prepareStatement(sqlLink);
-                ps3.executeUpdate();
-            }
-
-//            String sqlLink = "INSERT INTO link_keywords(id_key, id_catalog) (SELECT catalog.id, keywords.id FROM catalog, keywords WHERE catalog.id = '" + idCatalog + "' AND keywords.id = '" + idKeyword + "')";
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.err.println(e);
         }
-
     }
 
     private void readConfigFile() {
@@ -151,11 +143,15 @@ public class PhotoManagerDB {
                 port = p.getProperty(PROP_PORT);
             } else {
                 port = DEFAULT_PORT;
+
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(PhotoManagerDB.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PhotoManagerDB.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
         } catch (IOException ex) {
-            Logger.getLogger(PhotoManagerDB.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PhotoManagerDB.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
