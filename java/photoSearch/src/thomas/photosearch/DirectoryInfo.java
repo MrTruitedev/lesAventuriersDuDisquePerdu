@@ -36,16 +36,16 @@ public class DirectoryInfo {
         String valuestr = "";
         for (Map.Entry<String, String> entry : directory.entrySet()) {
             namestr += entry.getKey() + ",";
-            valuestr += "'" + entry.getValue() + "',";
+            valuestr += "'" + entry.getValue().replace("'", "") + "',";
         }
          for (Map.Entry<String, String> entry : resume.entrySet()) {
             namestr += entry.getKey() + ",";
-            valuestr += "'" + entry.getValue() + "',";
+            valuestr += "'" + entry.getValue().replace("'", "") + "',";
         }
         str_nv[0] = namestr.substring(0, namestr.length() - 1);
         str_nv[1] = valuestr.substring(0, valuestr.length() - 1);
 
-        System.out.println(">> " + str_nv[0] + ">> " + str_nv[1]);
+        //System.out.println(">> " + str_nv[0] + ">> " + str_nv[1]);
 
         return str_nv;
     }

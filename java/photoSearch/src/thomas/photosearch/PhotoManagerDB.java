@@ -14,8 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
-
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,7 +89,7 @@ public class PhotoManagerDB {
             if (rsCatalog.next()) {
                 idCatalog = rsCatalog.getInt(1);
             }
-            System.out.println("LAST INSERTED ID CATALOG >>>>>" + idCatalog);
+            //System.out.println("LAST INSERTED ID CATALOG >>>>>" + idCatalog);
             //Initialisation de la variable splitKeywords
             //Recupere plusieurs chaines de caracteres puis la découpe suivant la regex " " afin de retourner un tableau contenant une chaine de caractere par ligne 
             String[] splitKeywords = kl.getAllKeywords().split(" ");
@@ -113,7 +111,7 @@ public class PhotoManagerDB {
                     if (size == 0) {
                         //Requete d'insertion dans la table keyword
                         String sqlKeywordsInsert = "INSERT INTO keywords(keyword) VALUES ('" + splitKeywords[i] + "')";
-                        System.out.println("KEYWORD>>>>> " + splitKeywords[i]);
+                        //System.out.println("KEYWORD>>>>> " + splitKeywords[i]);
                         //Préparation de la requete et ajout d'un statement afin de récuperer l'id de la derniere ligne inserée
                         PreparedStatement psKey = con.prepareStatement(sqlKeywordsInsert, Statement.RETURN_GENERATED_KEYS);
                         psKey.executeUpdate();
@@ -130,7 +128,7 @@ public class PhotoManagerDB {
                     psLink.execute();
                 }
             }
-            System.out.println("LAST INSERTED ID KEYWORDS >>>>>" + idKeyword);
+            //System.out.println("LAST INSERTED ID KEYWORDS >>>>>" + idKeyword);
         } catch (SQLException e) {
             System.err.println(e);
         }

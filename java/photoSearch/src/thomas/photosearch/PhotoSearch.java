@@ -5,11 +5,7 @@
  */
 package thomas.photosearch;
 
-import static com.sun.org.apache.xalan.internal.lib.ExsltDatetime.year;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.time.LocalDate;
 
 /**
  *
@@ -23,10 +19,11 @@ public class PhotoSearch {
 
     /**
      * @param args the command line arguments
+     * @throws java.sql.SQLException
      */
     public static void main(String[] args) throws SQLException {
         if (args.length != 2) {
-            System.err.println("Give 2 XML files (WORK and STOCK)");
+            System.err.println("Give 2 XML files (WORK and STOCK) AND A TIME PERIOD");
             System.exit(1);
         }
         PhotoSearch ps = new PhotoSearch(args[0], args[1]);
