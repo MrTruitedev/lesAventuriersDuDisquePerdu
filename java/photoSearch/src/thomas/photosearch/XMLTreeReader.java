@@ -5,6 +5,7 @@
  */
 package thomas.photosearch;
 
+import static com.sun.org.apache.xalan.internal.lib.ExsltDatetime.date;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
@@ -29,11 +30,10 @@ public class XMLTreeReader {
 
     public final static String ATTR_CONTAINER = "container";
     public final static String ATTR_VERSION = "version";
-
     public final static int CONTAINER_TYPE_WORK = 1;
     public final static int CONTAINER_TYPE_STOCK = 2;
     public final static int CONTAINER_TYPE_UNKNOW = 0;
-
+    private String currentDay;
     private int length = 0;
     public int containerType = CONTAINER_TYPE_UNKNOW;
 
@@ -49,6 +49,10 @@ public class XMLTreeReader {
     }
 
     public XMLTreeReader(String fileName) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
+        currentDay = formatter.format(date);
+        
         try {
             // creating a constructor of file class and
             // parsing an XML file
@@ -108,10 +112,10 @@ public class XMLTreeReader {
             return null;
         }
         DirectoryInfo di = new DirectoryInfo();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
+        
+        
 
-        Node node = nodeList.item(index);// Pointe sur le tag DIRECTORY à la position [index]
+        Node node = nodeList.item(index);  // Pointe sur le tag DIRECTORY à la position [index]
 
         if (node.getNodeType() == Node.ELEMENT_NODE) {
             Element tElement = (Element) node;
@@ -122,7 +126,7 @@ public class XMLTreeReader {
             if (attrList.getLength() > 0) {
                 for (int i = 0; i < attrList.getLength(); i++) {
                     di.addDirectoryAttr(attrList.item(i).getNodeName(), attrList.item(i).getNodeValue());
-                    di.addDirectoryAttr("date", formatter.format(date));
+                    di.addDirectoryAttr("date", currentDay);
                 }
             }
             //Boucle pour parcourir les noeuds enfant de DIRECTORY

@@ -9,10 +9,10 @@ C:\Users\thomas\Desktop\Stage\java\ReadXMLFile\XMLFile.xml
 
 DEVELSERV 192.168.0.25
 
-finir requet insert (récuperer les id) CHECKED
+finir requet insert (récuperer les id)===> CHECKED
 
 table catalog : renseigner la date(j/m/a/h:m:s) de maj de la base (champ date de catalog)
-		recuperer la date du jour au lancement du programme java et l'inscrire en bdd
+		recuperer la date du jour au lancement du programme java et l'inscrire en bdd  ====> CHECKED
 
 a <= SELECT min(date) FROM catalog
 DELETE FROM catalog WHERE date=a
@@ -20,6 +20,19 @@ DELETE FROM catalog WHERE date=a
 proposer un nouveau parametre au main photoSearch (ex -hx ou -h x, x étant un entier)
 ce parametre permet de sauvegarder x periode dans la base
 quand le nb de periode est dépassé on supprime la plus ancienne
-par défaut se limite à deux periodes
+par défaut se limite à deux periodes =====> CHECKED
 
 scripts/mysqlscripts/initdatabase.sh maj nom des champs de catalog
+
+1 -> j'execute le 20220916
+donc periodMin = "20220915"
+     periodMax = "20220916"
+     currentPeriod = "20220916"
+
+2 -> jexecute le 20220917
+donc periodMin = "20220915"
+     periodMax = "20220916"
+     currentPeriod = "20220917"
+
+donc après insertion, currentPeriod devient periodMax, periodMax devient periodMin et periodMin est effacé
+supprimer aussi les id dans la table link =====> CHECKED

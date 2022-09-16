@@ -14,6 +14,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +34,19 @@ public class PhotoManagerDB {
     public final static String PROP_USER = "DB_USER";
     public final static String PROP_PASSWORD = "DB_PASSWORD";
     public final static String PROP_PORT = "DB_PORT";
+    public String periodMax = "";
+    public String periodMin;
+    public String currentPeriod = "";
+    private int records = 0;
+    private int maxRecords = 2;
+
+    public int getMaxRecord() {
+        return maxRecords;
+    }
+
+    public void setMaxRecord(int value) {
+        this.maxRecords = value;
+    }
 
     String host;
     String database;
@@ -73,22 +89,22 @@ public class PhotoManagerDB {
     void insert(DirectoryInfo di, DirectoryInfo kl) throws SQLException {
         // Initialisation des variables idCatalog et idKeyword utilisées pour remplir la table link_keywords
         int idCatalog = -1;
-        int idKeyword = -1;
 
         try {
             //Requete d'insertion dans la table catalog
             //Recupere les infos contenues dans di[0](->key) et di[1](->values)
-            String sqlCatalog = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")" ;
-            
+            String sqlCatalog = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")";
+
             //Préparation de la requete et ajout d'un statement afin de récuperer l'id de la derniere ligne inserée
-            PreparedStatement ps1 = con.prepareStatement(sqlCatalog, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement psInsertCatalog = con.prepareStatement(sqlCatalog, Statement.RETURN_GENERATED_KEYS);
             //Execution de la requete
-            ps1.executeUpdate();
+            psInsertCatalog.executeUpdate();
             //Recuperation de l'id de la derniere ligne inserée dans rsCatalog
-            ResultSet rsCatalog = ps1.getGeneratedKeys();
+            ResultSet rsCatalog = psInsertCatalog.getGeneratedKeys();
             if (rsCatalog.next()) {
                 idCatalog = rsCatalog.getInt(1);
             }
+            currentPeriod = di.directory.get("date");
             //System.out.println("LAST INSERTED ID CATALOG >>>>>" + idCatalog);
             //Initialisation de la variable splitKeywords
             //Recupere plusieurs chaines de caracteres puis la découpe suivant la regex " " afin de retourner un tableau contenant une chaine de caractere par ligne 
@@ -102,8 +118,8 @@ public class PhotoManagerDB {
                     int size;
                     //Recherche de l'id du mot clé que l'on voudrait inserer
                     String sqlKeywordsSelect = "SELECT id FROM `keywords` WHERE keyword = '" + splitKeywords[i] + "'";
-                    Statement ps2 = con.createStatement();
-                    ResultSet rsSelect = ps2.executeQuery(sqlKeywordsSelect);
+                    Statement psSelectKeyword = con.createStatement();
+                    ResultSet rsSelect = psSelectKeyword.executeQuery(sqlKeywordsSelect);
                     rsSelect.last();
                     size = rsSelect.getRow();
                     rsSelect.beforeFirst();
@@ -113,19 +129,19 @@ public class PhotoManagerDB {
                         String sqlKeywordsInsert = "INSERT INTO keywords(keyword) VALUES ('" + splitKeywords[i] + "')";
                         //System.out.println("KEYWORD>>>>> " + splitKeywords[i]);
                         //Préparation de la requete et ajout d'un statement afin de récuperer l'id de la derniere ligne inserée
-                        PreparedStatement psKey = con.prepareStatement(sqlKeywordsInsert, Statement.RETURN_GENERATED_KEYS);
-                        psKey.executeUpdate();
-                          //Recuperation de l'id de la derniere ligne inserée dans rsKeyword
-                        ResultSet rsKeyword = psKey.getGeneratedKeys();
-                        if (rsKeyword.next()) {
-                            idKeyword = rsKeyword.getInt(1);
-                        }
+                        PreparedStatement psInsertKeywords = con.prepareStatement(sqlKeywordsInsert, Statement.RETURN_GENERATED_KEYS);
+                        psInsertKeywords.executeUpdate();
+                        //Recuperation de l'id de la derniere ligne inserée dans rsKeyword
+//                        ResultSet rsKeyword = psInsertKeywords.getGeneratedKeys();
+//                        if (rsKeyword.next()) {
+//                            idKeyword = rsKeyword.getInt(1);
+//                        }
                     }
                     //Requete d'insertion dans la table keyword
                     //Elle recupere le dernier id inseré dans la table catalog et l'associe aux id des keyword correspondant
                     String sqlLinkInsert = "INSERT INTO link_keywords(id_catalog, id_key) VALUES ('" + idCatalog + "', (SELECT keywords.id FROM keywords WHERE keyword = '" + splitKeywords[i] + "'))";
-                    PreparedStatement psLink = con.prepareStatement(sqlLinkInsert);
-                    psLink.execute();
+                    PreparedStatement psInsertLink = con.prepareStatement(sqlLinkInsert);
+                    psInsertLink.execute();
                 }
             }
             //System.out.println("LAST INSERTED ID KEYWORDS >>>>>" + idKeyword);
@@ -172,5 +188,42 @@ public class PhotoManagerDB {
                     .getName()).log(Level.SEVERE, null, ex);
         }
     }
-   
+
+    public void periodManager() throws ParseException {
+        int currentRecords = 0;
+        try {
+            String sqlPeriods = "select DATE_FORMAT(min(date),'%Y%m%d%H%i') from catalog group by DATE_FORMAT(date,'%Y%m%d%H%i') order by DATE_FORMAT(date,'%Y%m%d%H%i')";
+            PreparedStatement psSelectPeriod = con.prepareStatement(sqlPeriods);
+            psSelectPeriod.executeQuery();
+            ResultSet rsPeriods = psSelectPeriod.getResultSet();
+            rsPeriods.last();
+            currentRecords = rsPeriods.getRow();
+            String resultPeriodMin = "select min(date) from catalog order by date";
+            PreparedStatement psSelectPeriodMin = con.prepareStatement(resultPeriodMin);
+            psSelectPeriodMin.executeQuery();
+            ResultSet rsPeriodMin = psSelectPeriodMin.getResultSet();
+            rsPeriodMin.first();
+            periodMin = rsPeriodMin.getString(1);
+//            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            Date result = dateFormatter.parse(periodMin);
+            System.out.println("PERIODMIN >>>> " + periodMin);
+        } catch (SQLException e) {
+            System.err.println(e);
+        }
+        System.out.println("CURRENTRECORDS >>>> "+currentRecords);
+        if (currentRecords >= maxRecords) {
+            try {
+                String sqlDeleteLink = "DELETE FROM link_keywords WHERE id_catalog = ANY (SELECT id FROM catalog WHERE catalog.date = '"+periodMin+"')";
+                PreparedStatement psDeleteLink = con.prepareStatement(sqlDeleteLink);
+                psDeleteLink.execute();
+                String sqlDeletePeriodMin = "DELETE FROM catalog WHERE date = '" + periodMin + "'";
+                PreparedStatement psDeletePeriodMin = con.prepareStatement(sqlDeletePeriodMin);
+                psDeletePeriodMin.execute();
+
+                
+            } catch (SQLException e) {
+                System.err.println(e);
+            }
+        }
+    }
 }

@@ -25,7 +25,7 @@ public class DirectoryInfo {
     public final static String TYPE_STOCK = "STOCK";
     public final static String TYPE_UNKNOW = "???";
     private int containerType;
-    
+
     public HashMap<String, String> getDirectory() {
         return directory;
     }
@@ -38,7 +38,7 @@ public class DirectoryInfo {
             namestr += entry.getKey() + ",";
             valuestr += "'" + entry.getValue().replace("'", "") + "',";
         }
-         for (Map.Entry<String, String> entry : resume.entrySet()) {
+        for (Map.Entry<String, String> entry : resume.entrySet()) {
             namestr += entry.getKey() + ",";
             valuestr += "'" + entry.getValue().replace("'", "") + "',";
         }
@@ -46,14 +46,14 @@ public class DirectoryInfo {
         str_nv[1] = valuestr.substring(0, valuestr.length() - 1);
 
         //System.out.println(">> " + str_nv[0] + ">> " + str_nv[1]);
-
         return str_nv;
     }
-    public String getAllKeywords(){
+
+    public String getAllKeywords() {
         String kw = "";
         Enumeration enumeration = Collections.enumeration(keywordsList);
-        while(enumeration.hasMoreElements()){
-            kw += (String) enumeration.nextElement()+" ";
+        while (enumeration.hasMoreElements()) {
+            kw += (String) enumeration.nextElement() + " ";
         }
         return kw;
     }
@@ -94,6 +94,5 @@ public class DirectoryInfo {
             default:
                 this.containerType = 0;
         }
-
     }
 }
