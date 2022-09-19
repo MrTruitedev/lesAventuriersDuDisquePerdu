@@ -5,7 +5,6 @@
  */
 package thomas.photosearch;
 
-import static com.sun.org.apache.xalan.internal.lib.ExsltDatetime.date;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
@@ -18,37 +17,59 @@ import java.util.Date;
 import org.w3c.dom.NamedNodeMap;
 
 /**
- *
+ * XMLTreeReader est la classe conentant les methodes nous permettant de parcourir, analyser et classer les
+ * données contenue dans le fichier xml retourné par gettrees.
+ * 
  * @author thomas
+ * @author eddy
  */
 public class XMLTreeReader {
-
+    //Constante de TAG, noms des attributs contenant les données que nous souhaitons récuperer.
     public final static String TAG_PHOTO_CAT = "PHOTO_CAT";
     public final static String TAG_DIRECTORY = "DIRECTORY";
     public final static String TAG_KEYWORDS = "KEYWORDS";
     public final static String TAG_RESUME = "RESUME";
-
     public final static String ATTR_CONTAINER = "container";
     public final static String ATTR_VERSION = "version";
     public final static int CONTAINER_TYPE_WORK = 1;
     public final static int CONTAINER_TYPE_STOCK = 2;
     public final static int CONTAINER_TYPE_UNKNOW = 0;
-    private String currentDay;
-    private int length = 0;
     public int containerType = CONTAINER_TYPE_UNKNOW;
-
+    //Variable qui contiendra la date et l'heure d'execution du script
+    private String currentDay;
+    
+    private int length = 0;
+    //Contiendra la liste des noeuds contenue dans le fichier xml
     private NodeList nodeList;
     private String version;
 
+    /**
+     * getter version du fichier xml
+     * @return version
+     */
+        
     public String getVersion() {
         return version;
     }
+    
+    /**
+     * Getter containerType
+     * @return containerType        Les données sont soit de type WORK soit STOCK
+     */
 
     public int getContainerType() {
         return containerType;
     }
+    
+    /**
+     * Methode de lecture et parse du fichier xml pris en parametre
+     * Cette methode construit une nodeList contenant toutes les données du fichier
+     * Cette nodelist peut ensuite etre parcouru pour récuperer les données souhaitées.
+     * @param fileName 
+     */
 
     public XMLTreeReader(String fileName) {
+        //Recuperation de la date/heure de lancement du script
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
         currentDay = formatter.format(date);
@@ -103,18 +124,30 @@ public class XMLTreeReader {
 
     }
 
+    /**
+     * Getter length du ficher
+     * @return length       Longueur du fichier xml
+     */
+    
     public int getLength() {
         return length;
     }
+    
+    /**
+     * Methode nous permettant de récuperer les données contenue dans la nodelist.
+     * Elle insere ensuite ces données dans les hashmps et arraylist correspondant 
+     * dans une instance de l'objet DirectoryInfo
+     * @param index         La ligne du fichier xml a partir de laquelle on veut récuperer les données
+     * @return di               Retourne une instance de DirectoryInfo contenant toutes les données récuperées 
+     * à la ligne index
+     */
 
     public DirectoryInfo getLine(int index) {
         if (index > length) {
             return null;
         }
         DirectoryInfo di = new DirectoryInfo();
-        
-        
-
+       
         Node node = nodeList.item(index);  // Pointe sur le tag DIRECTORY à la position [index]
 
         if (node.getNodeType() == Node.ELEMENT_NODE) {

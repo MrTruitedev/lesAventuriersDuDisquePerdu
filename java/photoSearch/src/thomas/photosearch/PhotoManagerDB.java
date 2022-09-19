@@ -14,16 +14,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Gere les methodes relatives a la base de données PhotoCatalog. Permet la
+ * connexion via la lecture d'un fichier config_file Permet d'inserer les
+ * données de DirectoryInfo en bdd Permet de gerer des periodes (ici deux)
+ * d'insertion, afin d'effacer les insertions les plus anciennes.
  *
  * @author thomas
+ * @author eddy
  */
 public class PhotoManagerDB {
 
@@ -34,39 +36,56 @@ public class PhotoManagerDB {
     public final static String PROP_USER = "DB_USER";
     public final static String PROP_PASSWORD = "DB_PASSWORD";
     public final static String PROP_PORT = "DB_PORT";
-    public String periodMax = "";
-    public String periodMin;
-    public String currentPeriod = "";
-    private int records = 0;
-    private int maxRecords = 2;
-
-    public int getMaxRecord() {
-        return maxRecords;
-    }
-
-    public void setMaxRecord(int value) {
-        this.maxRecords = value;
-    }
-
     String host;
     String database;
     String user;
     String password;
     String port;
     String configFile;
-
     private Connection con = null;
 
+    //Period properties
+    public String periodMax = "";
+    public String periodMin;
+    public String currentPeriod = "";
+    private int maxRecords = 2;
+
+    /**
+     * getter maxRecords
+     *
+     * @return maxRecords Le nombre de periodes maximum que l'on veut inscrire
+     * en bdd
+     */
+    public int getMaxRecord() {
+        return maxRecords;
+    }
+
+    /**
+     * Setter maxRecords
+     *
+     * @param value Le nombre de periodes maximum que l'on veut inscrire en bdd
+     */
+    public void setMaxRecord(int value) {
+        this.maxRecords = value;
+    }
+
+    /**
+     * Setter configFile
+     *
+     * @param configFile
+     */
     public PhotoManagerDB(String configFile) {
         this.configFile = configFile;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException ex) {
-
             Logger.getLogger(PhotoManagerDB.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    /**
+     * Methode de connection a la bdd PhotoCatalog
+     */
     public void connect() {
         readConfigFile();
         try {
@@ -78,6 +97,9 @@ public class PhotoManagerDB {
 
     }
 
+    /**
+     * Methodes de fermeture de connection a la bdd
+     */
     public void close() {
         try {
             con.close();
@@ -86,6 +108,17 @@ public class PhotoManagerDB {
         }
     }
 
+    /**
+     * Methode d'insertion en bdd Elle permet de remplir les differents champs
+     * des tables catalog et keywords à partir des données de DirectoryInfo. La
+     * table link_keywords est rempli a partir de l'id de la derniere entrée
+     * dans catalog et des keywords qui lui sont associés.
+     *
+     * @param di Instance de l'objet DirectoryInfo, contenant les données de
+     * directory et resume
+     * @param kl Instance de l'objet DirectoryInfo, contenant les keywords.
+     * @throws SQLException
+     */
     void insert(DirectoryInfo di, DirectoryInfo kl) throws SQLException {
         // Initialisation des variables idCatalog et idKeyword utilisées pour remplir la table link_keywords
         int idCatalog = -1;
@@ -94,7 +127,6 @@ public class PhotoManagerDB {
             //Requete d'insertion dans la table catalog
             //Recupere les infos contenues dans di[0](->key) et di[1](->values)
             String sqlCatalog = "INSERT INTO catalog(" + di.getAllKeyValueForCatalog()[0] + ") VALUES (" + di.getAllKeyValueForCatalog()[1] + ")";
-
             //Préparation de la requete et ajout d'un statement afin de récuperer l'id de la derniere ligne inserée
             PreparedStatement psInsertCatalog = con.prepareStatement(sqlCatalog, Statement.RETURN_GENERATED_KEYS);
             //Execution de la requete
@@ -104,6 +136,7 @@ public class PhotoManagerDB {
             if (rsCatalog.next()) {
                 idCatalog = rsCatalog.getInt(1);
             }
+            //Récuperation de la date et heure d'éxecution du script
             currentPeriod = di.directory.get("date");
             //System.out.println("LAST INSERTED ID CATALOG >>>>>" + idCatalog);
             //Initialisation de la variable splitKeywords
@@ -131,11 +164,6 @@ public class PhotoManagerDB {
                         //Préparation de la requete et ajout d'un statement afin de récuperer l'id de la derniere ligne inserée
                         PreparedStatement psInsertKeywords = con.prepareStatement(sqlKeywordsInsert, Statement.RETURN_GENERATED_KEYS);
                         psInsertKeywords.executeUpdate();
-                        //Recuperation de l'id de la derniere ligne inserée dans rsKeyword
-//                        ResultSet rsKeyword = psInsertKeywords.getGeneratedKeys();
-//                        if (rsKeyword.next()) {
-//                            idKeyword = rsKeyword.getInt(1);
-//                        }
                     }
                     //Requete d'insertion dans la table keyword
                     //Elle recupere le dernier id inseré dans la table catalog et l'associe aux id des keyword correspondant
@@ -150,6 +178,11 @@ public class PhotoManagerDB {
         }
     }
 
+    /**
+     * Methode de lecture du fichier configFile Ici, l'objet FileReader nous
+     * permet de lier les differentes proprietés contenue dans configFile et les
+     * lier aux attributs du constructeur de PhotoManagerDB
+     */
     private void readConfigFile() {
         try {
             FileReader reader = new FileReader(this.configFile);
@@ -189,38 +222,55 @@ public class PhotoManagerDB {
         }
     }
 
-    public void periodManager() throws ParseException {
+    /**
+     * Methode de gestion des periodes. Elle permet de tester combien de date
+     * d'execution du script sont inscrites en bdd Si le nombre de dates est
+     * superieur au nombre maximum de periodes autorisé, la date la plus
+     * ancienne est supprimée
+     */
+    public void periodManager() {
+        //Initialisation de la variable currentRecords, permet de récuperer le nombre de date differentes inscrites en bdd
         int currentRecords = 0;
         try {
-            String sqlPeriods = "select DATE_FORMAT(min(date),'%Y%m%d%H%i') from catalog group by DATE_FORMAT(date,'%Y%m%d%H%i') order by DATE_FORMAT(date,'%Y%m%d%H%i')";
+            //Requete de selection des dates dans la table catalog
+            String sqlPeriods = "select min(date) from catalog group by date order by date";
+            //Préparation de la requete
             PreparedStatement psSelectPeriod = con.prepareStatement(sqlPeriods);
+            //Execution de la requete
             psSelectPeriod.executeQuery();
+            //Recuperation des données de la requete dans un resultSet rsPeriods
             ResultSet rsPeriods = psSelectPeriod.getResultSet();
+            //Pointage sur la premiere entrée de resultSet
+            rsPeriods.first();
+            //Recuperation du contenu de la requete
+            periodMin = rsPeriods.getString(1);
+            //Pointage sur la derniere entrée de la requete
             rsPeriods.last();
+            //Recuperation du nombre de ligne de rsPeriods, celà nous indique le nombre de dates
+            //differentes inscrites en bdd
             currentRecords = rsPeriods.getRow();
-            String resultPeriodMin = "select min(date) from catalog order by date";
-            PreparedStatement psSelectPeriodMin = con.prepareStatement(resultPeriodMin);
-            psSelectPeriodMin.executeQuery();
-            ResultSet rsPeriodMin = psSelectPeriodMin.getResultSet();
-            rsPeriodMin.first();
-            periodMin = rsPeriodMin.getString(1);
-//            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            Date result = dateFormatter.parse(periodMin);
-            System.out.println("PERIODMIN >>>> " + periodMin);
         } catch (SQLException e) {
             System.err.println(e);
         }
-        System.out.println("CURRENTRECORDS >>>> "+currentRecords);
+        //Test si currentRecords >= maxRecords alors on supprime toutes les entrées des tables catalog et link_keywords
+        //correspondant à la date la plus ancienne
         if (currentRecords >= maxRecords) {
             try {
-                String sqlDeleteLink = "DELETE FROM link_keywords WHERE id_catalog = ANY (SELECT id FROM catalog WHERE catalog.date = '"+periodMin+"')";
+                //Preparation de la requete delete link_keywords
+                //On supprime de link_keywords toutes les entrées à l'id de catalog où l'id de catalog correspond à la date la plus ancienne
+                String sqlDeleteLink = "DELETE FROM link_keywords WHERE id_catalog = ANY (SELECT id FROM catalog WHERE catalog.date = '" + periodMin + "')";
+                //Préparation de la requete
                 PreparedStatement psDeleteLink = con.prepareStatement(sqlDeleteLink);
+                //Execution de la requete
                 psDeleteLink.execute();
-                String sqlDeletePeriodMin = "DELETE FROM catalog WHERE date = '" + periodMin + "'";
-                PreparedStatement psDeletePeriodMin = con.prepareStatement(sqlDeletePeriodMin);
-                psDeletePeriodMin.execute();
-
                 
+                //Preparation de la requete delete catalog
+                //On supprime de catalog toutes les entrées correspondant à la date la plus ancienne
+                String sqlDeletePeriodMin = "DELETE FROM catalog WHERE date = '" + periodMin + "'";
+                 //Préparation de la requete
+                PreparedStatement psDeletePeriodMin = con.prepareStatement(sqlDeletePeriodMin);
+                 //Execution de la requete
+                psDeletePeriodMin.execute();
             } catch (SQLException e) {
                 System.err.println(e);
             }
