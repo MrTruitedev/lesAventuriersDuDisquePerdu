@@ -1,8 +1,0 @@
-GT_SERVER=serenity.frogs.local
-GT_SSH_PORT=50022
-GT_PHOTOS_DIR=/volume2/Photos
-GT_USER=eddy
-DB_USER=eddy
-DB_SERVER=192.168.0.6
-DB_PASSWORD=girafe70
-DB_NAME=PhotoCatalog
